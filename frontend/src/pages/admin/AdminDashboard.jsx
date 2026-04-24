@@ -26,7 +26,7 @@ export default function AdminDashboard() {
   const pendingRequests = kitchenRequests.filter(r => r.status === "Pending");
 
   const stats = [
-    { label: "Total Sales", value: `$${total.toFixed(2)}`, icon: TrendingUp, color: "text-leaf" },
+    { label: "Total Sales", value: `₹${total.toFixed(2)}`, icon: TrendingUp, color: "text-leaf" },
     { label: "Total Orders", value: orders.length, icon: ClipboardList, color: "text-primary" },
     { label: "Published Items", value: todayCount, icon: Boxes, color: "text-accent" },
     { label: "Low Stock Alerts", value: lowStock.length, icon: AlertTriangle, color: "text-berry" },
@@ -81,7 +81,7 @@ export default function AdminDashboard() {
                   <div key={o.id} className="flex items-center justify-between border-b last:border-0 pb-3 last:pb-0">
                     <div>
                       <p className="font-medium">#{o.id.slice(-5)} · {o.customerName}</p>
-                      <p className="text-xs text-muted-foreground">{o.items.length} items · ${o.total.toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground">{o.items.length} items · ₹{o.total.toFixed(2)}</p>
                     </div>
                     <StatusBadge status={o.status} />
                   </div>

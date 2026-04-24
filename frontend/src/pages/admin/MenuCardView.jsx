@@ -195,7 +195,7 @@ export default function MenuCardView() {
                       <div className="flex items-center justify-between gap-2">
                         <h3 className="font-display font-black text-xl tracking-tight text-foreground group-hover:text-primary transition-colors">{item.name}</h3>
                         <div className="h-px bg-border flex-1 border-dotted border-b-2 mt-3" />
-                        <span className="font-display font-black text-xl text-primary">${item.price.toFixed(2)}</span>
+                        <span className="font-display font-black text-xl text-primary">₹{item.price.toFixed(2)}</span>
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground font-bold text-[9px] uppercase tracking-widest">
                         <div className={`w-1.5 h-1.5 rounded-full ${item.stock > 0 ? 'bg-leaf' : 'bg-berry'}`} />
@@ -249,7 +249,7 @@ export default function MenuCardView() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Price ($) *</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Price (₹) *</Label>
                 <Input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} placeholder="6.00" className="rounded-xl h-12 bg-muted/20 border-none" />
               </div>
               <div className="space-y-2">

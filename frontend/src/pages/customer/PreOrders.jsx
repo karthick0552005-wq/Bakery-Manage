@@ -149,7 +149,7 @@ export default function PreOrders() {
                     <h3 className="font-display font-black text-lg group-hover:text-primary transition-colors">{item.name}</h3>
                     <p className="text-xs text-muted-foreground font-medium">Pre-order available</p>
                   </div>
-                  <span className="font-display font-black text-lg text-foreground">${item.price}</span>
+                  <span className="font-display font-black text-lg text-foreground">₹{item.price}</span>
                 </div>
                 
                 <Button 
@@ -212,8 +212,8 @@ export default function PreOrders() {
                       <Plus className="w-4 h-4" />
                     </Button>
                     <div className="flex-1 text-right">
-                      <p className="text-2xl font-display font-black text-primary">${total}</p>
-                      <p className="text-[10px] text-muted-foreground font-bold">${selectedItem.price} each</p>
+                      <p className="text-2xl font-display font-black text-primary">₹{total}</p>
+                      <p className="text-[10px] text-muted-foreground font-bold">₹{selectedItem.price} each</p>
                     </div>
                   </div>
                 </div>
@@ -267,7 +267,7 @@ export default function PreOrders() {
             <AlertDialogDescription className="text-muted-foreground font-medium space-y-2">
               <span className="block">You're ordering <strong>{qty}x {selectedItem?.name}</strong> for tomorrow.</span>
               <span className="block">Delivery by <strong>{deliveryTime}</strong>.</span>
-              <span className="block text-lg font-display font-black text-foreground mt-2">Total: ${total.toFixed(2)}</span>
+              <span className="block text-lg font-display font-black text-foreground mt-2">Total: ₹{total.toFixed(2)}</span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-6 gap-3">

@@ -22,7 +22,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 
 export default function KitchenInventory() {
-  const { inventory, menu, addKitchenRequest, addInventoryItem } = useBakery();
+  const { inventory, menu, addKitchenRequest, addInventoryItem, kitchenRequests } = useBakery();
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [requestData, setRequestData] = useState({});
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -82,7 +83,7 @@ export default function KitchenInventory() {
         subtitle="Monitor ingredients and finished product stock levels."
         action={
           <div className="flex gap-3">
-            <Button variant="outline" className="rounded-xl font-bold gap-2" onClick={() => toast.info("Restock request history coming soon")}>
+            <Button variant="outline" className="rounded-xl font-bold gap-2" onClick={() => setIsHistoryOpen(true)}>
               <History className="w-4 h-4" /> Request History
             </Button>
             <Button className="rounded-xl font-black gap-2 shadow-lg" onClick={() => setIsAddModalOpen(true)}>
@@ -591,6 +592,56 @@ export default function KitchenInventory() {
             >
               <Plus className="w-5 h-5" /> Register Item
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Request History Modal */}
+      <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+        <DialogContent className="sm:max-w-[600px] rounded-[2.5rem] p-0 border-none shadow-2xl bg-white overflow-hidden max-h-[85vh] flex flex-col">
+          <div className="bg-muted p-8 text-foreground shrink-0 border-b">
+            <DialogHeader>
+              <DialogTitle className="text-3xl font-display font-black flex items-center gap-3">
+                <History className="w-8 h-8 text-primary" />
+                Restock History
+              </DialogTitle>
+              <p className="text-muted-foreground font-medium text-sm mt-1">Track your past material and stock requests sent to admin.</p>
+            </DialogHeader>
+          </div>
+
+          <div className="p-8 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
+            {kitchenRequests.length === 0 ? (
+              <div className="py-20 text-center space-y-4">
+                <History className="w-12 h-12 text-muted-foreground/20 mx-auto" />
+                <p className="text-muted-foreground font-medium italic">No request history found.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {kitchenRequests.filter(r => r.type === "Restock").map((req) => (
+                  <Card key={req.id} className="border-none bg-muted/30 rounded-2xl overflow-hidden">
+                    <CardContent className="p-5 flex items-center justify-between gap-4">
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary px-2 py-0.5 rounded">#{req.id}</span>
+                          <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${
+                            req.status === 'Approved' ? 'bg-leaf/10 text-leaf' : 
+                            req.status === 'Denied' ? 'bg-berry/10 text-berry' : 
+                            'bg-amber-500/10 text-amber-600'
+                          }`}>
+                            {req.status}
+                          </span>
+                        </div>
+                        <p className="text-sm font-bold text-foreground leading-relaxed">{req.note}</p>
+                        <p className="text-[10px] text-muted-foreground font-medium">{new Date(req.createdAt).toLocaleString()}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter className="p-6 bg-muted/10 border-t shrink-0">
+            <Button variant="ghost" onClick={() => setIsHistoryOpen(false)} className="w-full rounded-xl font-bold h-12">Close History</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

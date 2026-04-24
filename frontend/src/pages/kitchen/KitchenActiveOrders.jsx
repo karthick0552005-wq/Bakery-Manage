@@ -139,7 +139,7 @@ export default function KitchenActiveOrders() {
                           </div>
                           <span className="font-bold">{item.name}</span>
                         </div>
-                        <span className="font-display font-black text-primary">${item.price * item.qty}</span>
+                        <span className="font-display font-black text-primary">₹{item.price * item.qty}</span>
                       </div>
                     ))}
                   </div>
@@ -147,7 +147,7 @@ export default function KitchenActiveOrders() {
 
                 <div className="pt-4 border-t border-dashed flex items-center justify-between">
                   <span className="text-lg font-black">Total Amount</span>
-                  <span className="text-3xl font-display font-black text-primary">${selectedOrder.total}</span>
+                  <span className="text-3xl font-display font-black text-primary">₹{selectedOrder.total}</span>
                 </div>
               </div>
 

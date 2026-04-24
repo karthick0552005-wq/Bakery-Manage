@@ -61,7 +61,7 @@ export default function CustomerOrders() {
                             <span className="w-6 h-6 rounded-md bg-muted flex items-center justify-center text-xs font-black">{item.qty}x</span>
                             <span className="font-bold text-sm">{item.name}</span>
                           </div>
-                          <span className="text-sm font-black">${item.price * item.qty}</span>
+                          <span className="text-sm font-black">₹{item.price * item.qty}</span>
                         </div>
                       ))}
                     </div>
@@ -80,7 +80,7 @@ export default function CustomerOrders() {
                         <PackageCheck className="w-4 h-4 text-leaf mt-1" />
                         <div>
                           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Paid</p>
-                          <p className="text-lg font-display font-black text-primary">${order.total.toFixed(2)}</p>
+                          <p className="text-lg font-display font-black text-primary">₹{order.total.toFixed(2)}</p>
                         </div>
                       </div>
                     </div>

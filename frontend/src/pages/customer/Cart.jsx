@@ -70,7 +70,7 @@ export default function Cart() {
                   />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-bold truncate">{item.name}</h4>
-                    <p className="text-sm font-black text-primary">${item.price}</p>
+                    <p className="text-sm font-black text-primary">₹{item.price}</p>
                   </div>
                   <div className="flex items-center gap-1 bg-muted rounded-xl p-1">
                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => updateQty(item.id, -1)}>
@@ -98,7 +98,7 @@ export default function Cart() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm font-medium">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>₹{total.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm font-medium">
                     <span className="text-muted-foreground">Delivery</span>
@@ -108,7 +108,7 @@ export default function Cart() {
                 <div className="border-t pt-4">
                   <div className="flex justify-between items-end">
                     <span className="font-display font-bold">Total Amount</span>
-                    <span className="text-2xl font-display font-black text-primary">${total.toFixed(2)}</span>
+                    <span className="text-2xl font-display font-black text-primary">₹{total.toFixed(2)}</span>
                   </div>
                 </div>
                 <AlertDialog>
@@ -121,7 +121,7 @@ export default function Cart() {
                     <AlertDialogHeader>
                       <AlertDialogTitle className="text-2xl font-display font-black text-primary">Place your order?</AlertDialogTitle>
                       <AlertDialogDescription className="text-muted-foreground font-medium">
-                        Your total is <strong>${total.toFixed(2)}</strong>. Once placed, our bakers will start preparing your fresh treats!
+                        Your total is <strong>₹{total.toFixed(2)}</strong>. Once placed, our bakers will start preparing your fresh treats!
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="mt-6 gap-3">

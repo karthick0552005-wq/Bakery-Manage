@@ -79,7 +79,7 @@ export default function AdminReports() {
     const exportData = filteredOrders.map(o => ({
       "Order ID": o.id,
       "Customer": o.customerName,
-      "Total Revenue": `$${o.total.toFixed(2)}`,
+      "Total Revenue": `₹${o.total.toFixed(2)}`,
       "Status": o.status,
       "Date": new Date(o.createdAt).toLocaleDateString(),
       "Time": new Date(o.createdAt).toLocaleTimeString(),
@@ -91,10 +91,10 @@ export default function AdminReports() {
   };
 
   const stats = [
-    { label: "Total Revenue", value: `$${totalRevenue.toFixed(2)}`, icon: DollarSign, color: "text-leaf", bg: "bg-leaf" },
+    { label: "Total Revenue", value: `₹${totalRevenue.toFixed(2)}`, icon: DollarSign, color: "text-leaf", bg: "bg-leaf" },
     { label: "Total Orders", value: filteredOrders.length, icon: ShoppingCart, color: "text-primary", bg: "bg-primary" },
     { label: "Unique Customers", value: uniqueCustomers, icon: Users, color: "text-accent", bg: "bg-accent" },
-    { label: "Purchase Costs", value: `$${totalPurchaseCost.toFixed(2)}`, icon: Package, color: "text-berry", bg: "bg-berry" },
+    { label: "Purchase Costs", value: `₹${totalPurchaseCost.toFixed(2)}`, icon: Package, color: "text-berry", bg: "bg-berry" },
   ];
 
   return (
@@ -166,7 +166,7 @@ export default function AdminReports() {
                     </div>
                     <div className="text-right">
                       <span className="text-xs font-black text-muted-foreground">{item.qty} pcs</span>
-                      <span className="text-xs font-black text-leaf ml-2">${item.revenue.toFixed(2)}</span>
+                      <span className="text-xs font-black text-leaf ml-2">₹{item.revenue.toFixed(2)}</span>
                     </div>
                   </div>
                   <div className="w-full h-2.5 bg-muted rounded-full overflow-hidden">
@@ -219,7 +219,7 @@ export default function AdminReports() {
                 <div className="flex justify-between text-sm">
                   <span className="font-bold text-muted-foreground">Profit (Revenue - Costs)</span>
                   <span className={`font-black ${totalRevenue - totalPurchaseCost >= 0 ? 'text-leaf' : 'text-berry'}`}>
-                    ${(totalRevenue - totalPurchaseCost).toFixed(2)}
+                    ₹{(totalRevenue - totalPurchaseCost).toFixed(2)}
                   </span>
                 </div>
               </div>

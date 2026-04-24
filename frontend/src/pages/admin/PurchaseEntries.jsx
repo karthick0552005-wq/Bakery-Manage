@@ -44,7 +44,7 @@ export default function PurchaseEntries() {
       "Date": p.date,
       "Supplier": p.supplier,
       "Items": p.items,
-      "Total Amount": `$${p.total.toFixed(2)}`,
+      "Total Amount": `₹${p.total.toFixed(2)}`,
       "Status": p.status,
       "Type": p.type
     }));
@@ -85,7 +85,7 @@ export default function PurchaseEntries() {
                     <Input value={formData.items} onChange={e => setFormData({...formData, items: e.target.value})} placeholder="e.g. 50kg Flour, 10kg Yeast" className="rounded-xl h-12 bg-muted/30 border-none" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Total Amount ($)</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Total Amount (₹)</Label>
                     <Input type="number" value={formData.total} onChange={e => setFormData({...formData, total: e.target.value})} placeholder="0.00" className="rounded-xl h-12 bg-muted/30 border-none" />
                   </div>
                 </div>
@@ -107,7 +107,7 @@ export default function PurchaseEntries() {
             <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-2 py-1 rounded">Overall</span>
           </div>
           <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Total Spending</p>
-          <h3 className="text-4xl font-display font-black">${totalSpending.toFixed(2)}</h3>
+          <h3 className="text-4xl font-display font-black">₹{totalSpending.toFixed(2)}</h3>
         </Card>
         <Card className="border-none shadow-card rounded-[2rem] p-8">
           <div className="flex items-center justify-between mb-4">
@@ -166,7 +166,7 @@ export default function PurchaseEntries() {
                     </td>
                     <td className="px-8 py-5">
                       {entry.total > 0 
-                        ? <span className="font-display font-black text-primary">${entry.total.toFixed(2)}</span>
+                        ? <span className="font-display font-black text-primary">₹{entry.total.toFixed(2)}</span>
                         : <span className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest">—</span>
                       }
                     </td>
@@ -202,7 +202,7 @@ export default function PurchaseEntries() {
                 </div>
                 <div className="pt-4 border-t border-dashed flex items-center justify-between">
                   <span className="text-lg font-black">Total Paid</span>
-                  <span className="text-3xl font-display font-black text-primary">${selectedEntry.total.toFixed(2)}</span>
+                  <span className="text-3xl font-display font-black text-primary">₹{selectedEntry.total.toFixed(2)}</span>
                 </div>
               </div>
             </>

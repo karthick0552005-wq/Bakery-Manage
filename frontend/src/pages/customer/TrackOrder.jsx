@@ -5,6 +5,7 @@ import { useBakery } from "@/store/BakeryContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, Clock, Truck, ChefHat, MapPin, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
 const steps = [
   { id: 'Pending', label: 'Order Received', icon: Clock, description: 'We have received your order and are confirming it with the kitchen.' },
@@ -90,7 +91,15 @@ export default function TrackOrder() {
                 <p className="text-xs font-bold leading-relaxed opacity-90">
                   Your courier, <span className="font-black">Alex</span>, is currently picking up orders from the kitchen.
                 </p>
-                <Button className="w-full bg-white text-primary hover:bg-butter rounded-xl font-bold h-12">
+                <Button 
+                  className="w-full bg-white text-primary hover:bg-butter rounded-xl font-bold h-12"
+                  onClick={() => {
+                    toast.info("Connecting to Alex...");
+                    setTimeout(() => {
+                      window.location.href = "tel:+919876543210";
+                    }, 800);
+                  }}
+                >
                   Call Courier
                 </Button>
               </div>
@@ -103,12 +112,12 @@ export default function TrackOrder() {
               {order.items.map((item, idx) => (
                 <div key={idx} className="flex justify-between text-sm">
                   <span className="font-bold text-muted-foreground">{item.qty}x {item.name}</span>
-                  <span className="font-black">${item.price * item.qty}</span>
+                  <span className="font-black">₹{item.price * item.qty}</span>
                 </div>
               ))}
               <div className="border-t pt-3 flex justify-between">
                 <span className="font-display font-black">Total Paid</span>
-                <span className="font-display font-black text-primary">${order.total}</span>
+                <span className="font-display font-black text-primary">₹{order.total}</span>
               </div>
             </div>
           </Card>

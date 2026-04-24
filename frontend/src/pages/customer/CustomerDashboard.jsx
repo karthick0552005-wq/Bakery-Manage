@@ -69,7 +69,7 @@ export default function CustomerDashboard() {
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="font-display font-black text-xl">{item.name}</h3>
-                    <span className="font-display font-black text-lg text-primary">${item.price}</span>
+                    <span className="font-display font-black text-lg text-primary">₹{item.price}</span>
                   </div>
                   <p className="text-sm text-muted-foreground font-medium mb-4">Warm, flaky, and baked fresh this morning.</p>
                   <Button 
@@ -117,7 +117,7 @@ export default function CustomerDashboard() {
                           {order.status}
                         </span>
                         <span className="text-[10px] text-muted-foreground font-bold">
-                          ${order.total}
+                          ₹{order.total}
                         </span>
                       </div>
                     </div>

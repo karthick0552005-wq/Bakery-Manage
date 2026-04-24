@@ -153,7 +153,13 @@ export default function CustomerProfile() {
                 <p className="text-4xl font-display font-black text-primary">1,240</p>
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Current Balance</p>
               </div>
-              <Button variant="outline" className="w-full rounded-xl font-bold border-primary/20 text-primary hover:bg-primary/5">
+              <Button 
+                variant="outline" 
+                className="w-full rounded-xl font-bold border-primary/20 text-primary hover:bg-primary/5"
+                onClick={() => toast.success("Rewards Redeemed!", {
+                  description: "1,000 points have been converted to a ₹100 discount voucher."
+                })}
+              >
                 Redeem Rewards
               </Button>
             </Card>

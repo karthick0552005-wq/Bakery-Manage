@@ -139,7 +139,7 @@ export default function CustomerMenu() {
                     </h3>
                     <div className="h-px bg-border flex-1 border-dotted border-b-2 mt-4" />
                     <span className="font-display font-black text-3xl text-primary">
-                      ${item.price.toFixed(2)}
+                      ₹{item.price.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-muted-foreground font-bold text-[10px] uppercase tracking-widest">

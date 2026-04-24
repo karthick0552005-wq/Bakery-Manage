@@ -1,14 +1,15 @@
 import React from 'react';
 import PageHeader from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
+import { useBakery } from "@/store/BakeryContext";
 import { Star, MessageSquare, ChefHat, Clock, ThumbsUp } from "lucide-react";
 
 export default function KitchenFeedback() {
-  const feedbacks = [
-    { id: 1, item: "Sourdough Bread", rating: 5, comment: "Crispy crust and perfect crumb. Great batch today!", date: "1 hour ago" },
-    { id: 2, item: "Chocolate Croissant", rating: 4, comment: "Delicious, but could use a bit more chocolate filling.", date: "4 hours ago" },
-    { id: 3, item: "Cinnamon Roll", rating: 5, comment: "The glaze is amazing. Best rolls ever!", date: "Yesterday" },
-  ];
+  const { feedbacks } = useBakery();
+
+  const avgRating = feedbacks.length > 0
+    ? (feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length).toFixed(1)
+    : "5.0";
 
   return (
     <div className="space-y-8">
@@ -21,7 +22,7 @@ export default function KitchenFeedback() {
         <Card className="border-none shadow-card bg-primary text-primary-foreground rounded-3xl p-6">
           <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Kitchen Rating</p>
           <div className="flex items-end gap-2">
-            <h3 className="text-4xl font-display font-black">4.9</h3>
+            <h3 className="text-4xl font-display font-black">{avgRating}</h3>
             <Star className="w-6 h-6 fill-butter text-butter mb-2" />
           </div>
         </Card>
@@ -39,42 +40,47 @@ export default function KitchenFeedback() {
         <h3 className="text-xl font-display font-black flex items-center gap-2">
           <MessageSquare className="w-5 h-5 text-primary" /> Live Feedback Feed
         </h3>
-        {feedbacks.map((f) => (
-          <Card key={f.id} className="border-border/40 shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row justify-between gap-4">
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center overflow-hidden border border-border/40">
-                    <img 
-                      src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=100&auto=format&fit=crop" 
-                      alt="Product" 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-foreground">{f.item}</h4>
-                      <div className="flex">
-                        {[1, 2, 3, 4, 5].map(s => (
-                          <Star key={s} className={`w-3 h-3 ${s <= f.rating ? 'fill-amber-400 text-amber-400' : 'text-muted'}`} />
-                        ))}
-                      </div>
+        {feedbacks.length === 0 ? (
+          <div className="py-12 text-center border-2 border-dashed rounded-[2rem] bg-muted/20">
+            <MessageSquare className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+            <p className="text-muted-foreground font-medium italic">No customer feedback received yet.</p>
+          </div>
+        ) : (
+          feedbacks.map((f) => (
+            <Card key={f.id} className="border-border/40 shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all">
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row justify-between gap-4">
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                      <span className="text-lg font-black text-primary">
+                        {(f.customer || "A")[0].toUpperCase()}
+                      </span>
                     </div>
-                    <p className="text-sm text-muted-foreground font-medium italic">"{f.comment}"</p>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {f.date}
-                    </p>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-foreground">{f.customer || "Anonymous"}</h4>
+                        <div className="flex">
+                          {[1, 2, 3, 4, 5].map(s => (
+                            <Star key={s} className={`w-3 h-3 ${s <= f.rating ? 'fill-amber-400 text-amber-400' : 'text-muted'}`} />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground font-medium italic">"{f.comment}"</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> {f.date || "Recently"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-leaf bg-leaf/10 px-3 py-1 rounded-full flex items-center gap-1">
+                      <ThumbsUp className="w-3 h-3" /> Motivator
+                    </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-leaf bg-leaf/10 px-3 py-1 rounded-full flex items-center gap-1">
-                    <ThumbsUp className="w-3 h-3" /> Motivator
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       <div className="p-12 rounded-[2.5rem] bg-accent/5 border border-dashed border-accent/20 text-center space-y-4">
