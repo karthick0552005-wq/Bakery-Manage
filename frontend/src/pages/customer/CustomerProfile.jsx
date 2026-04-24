@@ -22,12 +22,19 @@ export default function CustomerProfile() {
   const [formData, setFormData] = React.useState({ 
     name: user?.name || '', 
     email: user?.email || 'hello@bakeryhub.com', 
-    phone: user?.phone || '+1 (555) 123-4567' 
+    phone: user?.phone || '+1 (555) 123-4567',
+    location: user?.location || 'Cloud City, NY'
   });
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleSave = () => {
-    updateUser({ ...user, name: formData.name, email: formData.email, phone: formData.phone });
+    updateUser({ 
+      ...user, 
+      name: formData.name, 
+      email: formData.email, 
+      phone: formData.phone,
+      location: formData.location 
+    });
     setIsOpen(false);
     toast.success("Profile updated successfully!");
   };
@@ -48,7 +55,7 @@ export default function CustomerProfile() {
           <div className="flex-1 space-y-1 mb-2">
             <h1 className="text-4xl font-display font-black tracking-tight">{user?.name || "The Baker"}</h1>
             <p className="text-muted-foreground font-bold flex items-center gap-2">
-              <MapPin className="w-4 h-4" /> Cloud City, NY
+              <MapPin className="w-4 h-4" /> {user?.location || 'Cloud City, NY'}
             </p>
           </div>
           
@@ -74,6 +81,10 @@ export default function CustomerProfile() {
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Phone Number</Label>
                   <Input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="rounded-xl h-12 bg-muted/30 border-none" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Location</Label>
+                  <Input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="rounded-xl h-12 bg-muted/30 border-none" />
                 </div>
               </div>
               <DialogFooter className="mt-4">
@@ -107,6 +118,13 @@ export default function CustomerProfile() {
                       <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Phone Number</p>
                     </div>
                     <p className="font-bold">{user?.phone || '+1 (555) 123-4567'}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-3 h-3 text-muted-foreground" />
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Location</p>
+                    </div>
+                    <p className="font-bold">{user?.location || 'Cloud City, NY'}</p>
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">

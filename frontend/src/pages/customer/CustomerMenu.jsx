@@ -18,12 +18,11 @@ import AddToCartConfirmation from "@/components/AddToCartConfirmation";
 import BakeryItemImage from "@/components/BakeryItemImage";
 
 export default function CustomerMenu() {
-  const { menu, addToCart } = useBakery();
+  const { catalog, addToCart } = useBakery();
   const [searchTerm, setSearchTerm] = useState("");
-  const [day, setDay] = useState("today");
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const filteredMenu = (menu[day] || []).filter(item => {
+  const filteredMenu = (catalog || []).filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
     return item.published && matchesSearch;
   });
@@ -51,7 +50,7 @@ export default function CustomerMenu() {
 
       {/* Filters & Navigation */}
       <div className="flex flex-col md:flex-row gap-6 items-center justify-between bg-card p-6 rounded-[2.5rem] border border-border/40 shadow-sm sticky top-4 z-40 backdrop-blur-md bg-card/80">
-        <div className="relative w-full md:max-w-md group">
+        <div className="relative w-full group">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
           <Input 
             placeholder="What are you craving today?" 
@@ -59,31 +58,6 @@ export default function CustomerMenu() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-        </div>
-        
-        <div className="flex items-center gap-4 w-full md:w-auto">
-          <Select value={day} onValueChange={setDay}>
-            <SelectTrigger className="w-full md:w-[220px] h-14 rounded-2xl bg-primary text-primary-foreground border-none font-black text-lg shadow-xl hover:shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                <SelectValue placeholder="Select Day" />
-              </div>
-            </SelectTrigger>
-            <SelectContent className="rounded-2xl border-none shadow-2xl p-2 bg-white">
-              <SelectItem value="today" className="rounded-xl font-black py-3 px-4 cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                <div className="flex flex-col">
-                  <span className="text-sm">Today's Specials</span>
-                  <span className="text-[10px] opacity-60 uppercase tracking-widest font-bold">Baked Fresh</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="tomorrow" className="rounded-xl font-black py-3 px-4 cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                <div className="flex flex-col">
-                  <span className="text-sm">Tomorrow's Menu</span>
-                  <span className="text-[10px] opacity-60 uppercase tracking-widest font-bold">Pre-Order Now</span>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
 

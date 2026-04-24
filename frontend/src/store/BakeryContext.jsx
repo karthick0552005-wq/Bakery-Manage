@@ -4,21 +4,19 @@ import { toast } from "sonner";
 const BakeryContext = createContext(null);
 
 export const BakeryProvider = ({ children }) => {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState(() => {
+    const saved = localStorage.getItem("bakery_orders");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const [inventory, setInventory] = useState(() => {
     const saved = localStorage.getItem("bakery_inventory");
-    if (saved) return JSON.parse(saved);
-    return [];
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [menu, setMenu] = useState(() => {
     const saved = localStorage.getItem("bakery_menu");
-    if (saved) return JSON.parse(saved);
-    return {
-      today: [],
-      tomorrow: []
-    };
+    return saved ? JSON.parse(saved) : { today: [], tomorrow: [] };
   });
 
   const [cart, setCart] = useState(() => {
@@ -26,7 +24,24 @@ export const BakeryProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Sync with LocalStorage
+  const [kitchenRequests, setKitchenRequests] = useState(() => {
+    const saved = localStorage.getItem("bakery_kitchen_requests");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [purchases, setPurchases] = useState(() => {
+    const saved = localStorage.getItem("bakery_purchases");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [feedbacks, setFeedbacks] = useState(() => {
+    const saved = localStorage.getItem("bakery_feedback");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [productionLog, setProductionLog] = useState([]);
+
+  // Restore Sync with LocalStorage
   useEffect(() => {
     localStorage.setItem("bakery_menu", JSON.stringify(menu));
   }, [menu]);
@@ -39,32 +54,21 @@ export const BakeryProvider = ({ children }) => {
     localStorage.setItem("bakery_cart", JSON.stringify(cart));
   }, [cart]);
 
-  // Sync inventory with LocalStorage
   useEffect(() => {
     localStorage.setItem("bakery_inventory", JSON.stringify(inventory));
   }, [inventory]);
 
-  // Listen for changes from other tabs
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === "bakery_menu") setMenu(JSON.parse(e.newValue));
-      if (e.key === "bakery_orders") setOrders(JSON.parse(e.newValue));
-      if (e.key === "bakery_cart") setCart(JSON.parse(e.newValue));
-      if (e.key === "bakery_inventory") setInventory(JSON.parse(e.newValue));
-      if (e.key === "bakery_kitchen_requests") setKitchenRequests(JSON.parse(e.newValue));
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
-
-  const [kitchenRequests, setKitchenRequests] = useState(() => {
-    const saved = localStorage.getItem("bakery_kitchen_requests");
-    return saved ? JSON.parse(saved) : [];
-  });
-
   useEffect(() => {
     localStorage.setItem("bakery_kitchen_requests", JSON.stringify(kitchenRequests));
   }, [kitchenRequests]);
+
+  useEffect(() => {
+    localStorage.setItem("bakery_purchases", JSON.stringify(purchases));
+  }, [purchases]);
+
+  useEffect(() => {
+    localStorage.setItem("bakery_feedback", JSON.stringify(feedbacks));
+  }, [feedbacks]);
 
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem("bakery_user");
@@ -72,16 +76,23 @@ export const BakeryProvider = ({ children }) => {
   });
 
   const login = (role) => {
-    const userData = { role, name: role.charAt(0).toUpperCase() + role.slice(1) + " User" };
+    const mockToken = btoa(JSON.stringify({ role, exp: Date.now() + 86400000 }));
+    const userData = { role, name: role.charAt(0).toUpperCase() + role.slice(1) + " User", token: mockToken };
     setUser(userData);
     localStorage.setItem("bakery_user", JSON.stringify(userData));
+    localStorage.setItem("bakery_token", mockToken);
     toast.success(`Logged in as ${userData.name}`);
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem("bakery_user");
+    localStorage.removeItem("bakery_token");
     toast.info("Logged out successfully");
+  };
+
+  const getToken = () => {
+    return localStorage.getItem("bakery_token");
   };
 
   const updateUser = (updatedData) => {
@@ -89,11 +100,12 @@ export const BakeryProvider = ({ children }) => {
     localStorage.setItem("bakery_user", JSON.stringify(updatedData));
   };
 
-  const addKitchenRequest = (type, note) => {
+  const addKitchenRequest = (type, note, metadata = null) => {
     const newRequest = {
       id: `REQ${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
       type,
       note,
+      metadata,
       status: "Pending",
       createdAt: new Date().toISOString()
     };
@@ -101,23 +113,30 @@ export const BakeryProvider = ({ children }) => {
   };
 
   const updateKitchenRequestStatus = (id, status) => {
-    setKitchenRequests(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+    setKitchenRequests(prev => prev.map(r => {
+      if (r.id === id) {
+        // If approved and it's a restock request, update the actual inventory
+        if (status === "Approved" && r.type === "Restock" && r.metadata) {
+          updateInventoryStock(r.metadata.itemId, parseFloat(r.metadata.qty), "Admin Approval", 0, "Kitchen");
+        }
+        return { ...r, status };
+      }
+      return r;
+    }));
     toast.success(`Request ${status}`);
   };
 
   const placeOrder = (items) => {
-    // 1. Check if enough stock is available for all items
+    // 1. Check if enough stock is available
     for (const orderedItem of items) {
       const menuItem = menu.today.find(m => m.id === orderedItem.id);
       if (menuItem && menuItem.stock < orderedItem.qty) {
-        toast.error(`Not enough stock for ${orderedItem.name}!`, {
-          description: `Only ${menuItem.stock} pcs available.`
-        });
+        toast.error(`Not enough stock for ${orderedItem.name}!`);
         return null;
       }
     }
 
-    // 2. Deduct stock from menu items
+    // 2. Deduct stock
     setMenu(prev => ({
       ...prev,
       today: prev.today.map(menuItem => {
@@ -129,7 +148,7 @@ export const BakeryProvider = ({ children }) => {
       })
     }));
 
-    // 3. Create the order
+    // 3. Create order
     const newOrder = {
       id: `ORD${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
       customerName: user?.name || "Guest",
@@ -145,7 +164,7 @@ export const BakeryProvider = ({ children }) => {
 
   const updateOrderStatus = (id, status) => {
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
-    toast.success(`Order #${id.slice(-5)} marked as ${status}`);
+    toast.success(`Order status updated to ${status}`);
   };
 
   const addMenuItem = (item, day = 'today') => {
@@ -162,7 +181,7 @@ export const BakeryProvider = ({ children }) => {
       ...prev,
       [day]: prev[day].map(item => item.id === id ? { ...item, ...updatedItem } : item)
     }));
-    toast.success(`${updatedItem.name} updated in ${day} menu!`);
+    toast.success("Item updated");
   };
 
   const deleteMenuItem = (id, day = 'today') => {
@@ -170,51 +189,7 @@ export const BakeryProvider = ({ children }) => {
       ...prev,
       [day]: prev[day].filter(item => item.id !== id)
     }));
-    toast.success("Item removed from menu");
-  };
-
-  const [productionLog, setProductionLog] = useState([]);
-
-  const [purchases, setPurchases] = useState(() => {
-    const saved = localStorage.getItem("bakery_purchases");
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  useEffect(() => {
-    localStorage.setItem("bakery_purchases", JSON.stringify(purchases));
-  }, [purchases]);
-
-  const addPurchaseEntry = (itemName, qty, unit, supplier, totalAmount = 0) => {
-    const newEntry = {
-      id: `PUR-${Math.floor(1000 + Math.random() * 9000)}`,
-      date: new Date().toLocaleDateString(),
-      supplier: supplier || "Manual Adjustment",
-      items: unit === 'entry' ? String(itemName) : `${qty > 0 ? '+' : ''}${qty} ${unit} of ${itemName}`,
-      total: totalAmount,
-      status: "Received",
-      type: unit === 'entry' ? "manual" : "stock_adjustment"
-    };
-    setPurchases(prev => [newEntry, ...prev]);
-  };
-  const [feedbacks, setFeedbacks] = useState(() => {
-    const saved = localStorage.getItem("bakery_feedback");
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  useEffect(() => {
-    localStorage.setItem("bakery_feedback", JSON.stringify(feedbacks));
-  }, [feedbacks]);
-
-  const addFeedback = (rating, comment) => {
-    const newFeedback = {
-      id: Date.now(),
-      customer: user?.name || "Anonymous",
-      rating,
-      comment,
-      date: "Just now",
-      status: "New"
-    };
-    setFeedbacks([newFeedback, ...feedbacks]);
+    toast.success("Item removed");
   };
 
   const completeProductionBatch = (itemId, producedQty, day = 'today') => {
@@ -286,6 +261,16 @@ export const BakeryProvider = ({ children }) => {
     toast.success(`${item.name} added to inventory!`);
   };
 
+  const updateInventoryItem = (id, updatedItem) => {
+    setInventory(prev => prev.map(item => item.id === id ? { ...item, ...updatedItem } : item));
+    toast.success("Inventory item updated");
+  };
+
+  const deleteInventoryItem = (id) => {
+    setInventory(prev => prev.filter(item => item.id !== id));
+    toast.success("Item removed from inventory");
+  };
+
   const updateInventoryStock = (id, adjustAmount, supplier = '', totalAmount = 0, location = 'Kitchen') => {
     let itemName = '';
     let itemUnit = '';
@@ -295,7 +280,7 @@ export const BakeryProvider = ({ children }) => {
         itemUnit = item.unit;
         
         const currentBakeryStock = item.bakeryStock || 0;
-        const currentKitchenStock = item.kitchenStock || (item.stock || 0); // migrate old stock to kitchen
+        const currentKitchenStock = item.kitchenStock || (item.stock || 0);
         
         let newBakeryStock = currentBakeryStock;
         let newKitchenStock = currentKitchenStock;
@@ -357,12 +342,66 @@ export const BakeryProvider = ({ children }) => {
     window.location.href = "/login";
   };
 
+  const addPurchaseEntry = (itemName, qty, unit, supplier, totalAmount = 0) => {
+    const newEntry = {
+      id: `PUR-${Math.floor(1000 + Math.random() * 9000)}`,
+      date: new Date().toLocaleDateString(),
+      supplier: supplier || "Manual Adjustment",
+      items: unit === 'entry' ? String(itemName) : `${qty > 0 ? '+' : ''}${qty} ${unit} of ${itemName}`,
+      total: totalAmount,
+      status: "Received",
+      type: unit === 'entry' ? "manual" : "stock_adjustment"
+    };
+    setPurchases(prev => [newEntry, ...prev]);
+  };
+
+  const addFeedback = (rating, comment) => {
+    const newFeedback = {
+      id: Date.now(),
+      customer: user?.name || "Anonymous",
+      rating,
+      comment,
+      date: "Just now",
+      status: "New"
+    };
+    setFeedbacks([newFeedback, ...feedbacks]);
+  };
+
+  const [catalog, setCatalog] = useState(() => {
+    const saved = localStorage.getItem("bakery_catalog");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("bakery_catalog", JSON.stringify(catalog));
+  }, [catalog]);
+
+  const addCatalogItem = (item) => {
+    const newItem = { ...item, id: `CAT${Math.floor(Math.random() * 10000)}`, published: true };
+    setCatalog(prev => [...prev, newItem]);
+    toast.success(`${item.name} added to Menu Card!`);
+  };
+
+  const updateCatalogItem = (id, updatedItem) => {
+    setCatalog(prev => prev.map(item => item.id === id ? { ...item, ...updatedItem } : item));
+    toast.success("Menu Card item updated");
+  };
+
+  const deleteCatalogItem = (id) => {
+    setCatalog(prev => prev.filter(item => item.id !== id));
+    toast.success("Item removed from Menu Card");
+  };
+
   return (
     <BakeryContext.Provider
       value={{
         orders,
         inventory,
         menu,
+        catalog,
+        addCatalogItem,
+        updateCatalogItem,
+        deleteCatalogItem,
         kitchenRequests,
         user,
         login,
@@ -385,12 +424,15 @@ export const BakeryProvider = ({ children }) => {
         addPurchaseEntry,
         updateInventoryStock,
         addInventoryItem,
+        updateInventoryItem,
+        deleteInventoryItem,
         feedbacks,
         addFeedback,
         moveMenuItemToDay,
         rolloverTomorrowToToday,
         updateUser,
-        resetSystem
+        resetSystem,
+        getToken
       }}
     >
       {children}

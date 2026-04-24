@@ -69,7 +69,10 @@ export default function KitchenInventory() {
     const data = requestData[item.id] || { qty: '5', urgency: 'Normal' };
     const finalNote = `REQ: ${data.qty}${item.unit} of ${item.name} for ${locationTab} | Urgency: ${data.urgency}`;
     
-    addKitchenRequest("Restock", finalNote);
+    addKitchenRequest("Restock", finalNote, {
+      itemId: item.id,
+      qty: data.qty
+    });
     toast.success(`Restock request sent for ${item.name}`, {
       description: `Requested ${data.qty}${item.unit} (${data.urgency})`
     });

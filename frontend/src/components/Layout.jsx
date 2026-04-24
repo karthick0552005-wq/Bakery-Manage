@@ -61,9 +61,15 @@ export default function Layout() {
   ];
 
   let navLinks = [];
-  if (user?.role === 'admin') navLinks = adminLinks;
-  else if (user?.role === 'customer') navLinks = customerLinks;
-  else if (user?.role === 'kitchen') navLinks = kitchenLinks;
+  if (location.pathname.startsWith('/admin')) navLinks = adminLinks;
+  else if (location.pathname.startsWith('/customer')) navLinks = customerLinks;
+  else if (location.pathname.startsWith('/kitchen')) navLinks = kitchenLinks;
+  else {
+    // Fallback to role-based if not in a specific section
+    if (user?.role === 'admin') navLinks = adminLinks;
+    else if (user?.role === 'customer') navLinks = customerLinks;
+    else if (user?.role === 'kitchen') navLinks = kitchenLinks;
+  }
 
   return (
     <div className='min-h-screen bg-background flex flex-col md:flex-row'>

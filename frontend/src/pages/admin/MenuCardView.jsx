@@ -13,14 +13,13 @@ import BakeryItemImage from "@/components/BakeryItemImage";
 
 export default function MenuCardView() {
   const navigate = useNavigate();
-  const { menu, addMenuItem, updateMenuItem, deleteMenuItem } = useBakery();
+  const { catalog, addCatalogItem, updateCatalogItem, deleteCatalogItem } = useBakery();
   const [searchTerm, setSearchTerm] = useState("");
-  const [day, setDay] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [itemToDelete, setItemToDelete] = useState(null);
-  const [formData, setFormData] = useState({ name: '', price: '', category: 'Bread', stock: '20', image: '', day: 'today' });
+  const [formData, setFormData] = useState({ name: '', price: '', stock: '20', image: '', published: true });
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
@@ -36,16 +35,15 @@ export default function MenuCardView() {
     const itemData = { 
       name: formData.name, 
       price: parseFloat(formData.price), 
-      category: formData.category, 
       stock: parseInt(formData.stock) || 0, 
       image: formData.image, 
-      published: true 
+      published: formData.published 
     };
 
     if (editingItem) {
-      updateMenuItem(editingItem.id, itemData, formData.day);
+      updateCatalogItem(editingItem.id, itemData);
     } else {
-      addMenuItem(itemData, formData.day);
+      addCatalogItem(itemData);
     }
     
     closeModal();
@@ -54,51 +52,38 @@ export default function MenuCardView() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingItem(null);
-    setFormData({ name: '', price: '', category: 'Bread', stock: '20', image: '', day: 'today' });
+    setFormData({ name: '', price: '', stock: '20', image: '', published: true });
   };
 
-  const openEditModal = (item, itemDay) => {
+  const openEditModal = (item) => {
     setEditingItem(item);
     setFormData({
       name: item.name,
       price: item.price.toString(),
-      category: item.category || 'Bread',
       stock: item.stock.toString(),
       image: item.image || '',
-      day: itemDay
+      published: item.published
     });
     setIsModalOpen(true);
   };
 
-  const confirmDelete = (item, itemDay) => {
-    setItemToDelete({ ...item, day: itemDay });
+  const confirmDelete = (item) => {
+    setItemToDelete(item);
     setIsDeleteModalOpen(true);
   };
 
   const handleDelete = () => {
     if (itemToDelete) {
-      deleteMenuItem(itemToDelete.id, itemToDelete.day);
+      deleteCatalogItem(itemToDelete.id);
       setIsDeleteModalOpen(false);
       setItemToDelete(null);
     }
   };
 
-  const filteredMenu = (() => {
-    let items = [];
-    if (day === "all") {
-      items = [
-        ...(menu.today || []).map(item => ({ ...item, dayContext: 'today' })), 
-        ...(menu.tomorrow || []).map(item => ({ ...item, dayContext: 'tomorrow' }))
-      ];
-    } else {
-      items = (menu[day] || []).map(item => ({ ...item, dayContext: day }));
-    }
-    
-    return items.filter(item => {
-      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
-      return item.published && matchesSearch;
-    });
-  })();
+  const filteredCatalog = catalog.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+    return item.published && matchesSearch;
+  });
 
   return (
     <div className="max-w-7xl mx-auto space-y-12 pb-20">
@@ -141,53 +126,29 @@ export default function MenuCardView() {
 
           {/* Controls inside Preview */}
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-12 bg-white/50 p-4 rounded-3xl border border-border/40">
-            <div className="relative w-full md:max-w-xs group">
+            <div className="relative w-full group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
-                placeholder="Search items..." 
-                className="pl-12 rounded-2xl bg-white border-none h-12 font-bold shadow-sm"
+                placeholder="Search menu items..." 
+                className="pl-12 rounded-2xl bg-white border-none h-12 font-bold shadow-sm w-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            
-            <Select value={day} onValueChange={setDay}>
-              <SelectTrigger className="w-full md:w-[200px] h-12 rounded-2xl bg-white border-none font-black shadow-sm">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-primary" />
-                  <SelectValue placeholder="Select Day" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="rounded-2xl border-none shadow-2xl">
-                <SelectItem value="all" className="font-bold">Full Catalog</SelectItem>
-                <SelectItem value="today" className="font-bold">Today's Specials</SelectItem>
-                <SelectItem value="tomorrow" className="font-bold">Tomorrow's Menu</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Menu Grid */}
-          {filteredMenu.length === 0 ? (
+          {filteredCatalog.length === 0 ? (
             <div className="p-20 text-center space-y-4 bg-muted/20 rounded-[3rem] border-2 border-dashed">
               <Search className="w-12 h-12 mx-auto text-muted-foreground/20" />
-              <p className="text-muted-foreground font-medium italic">No items found in this section.</p>
+              <p className="text-muted-foreground font-medium italic">No items found in your catalog.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredMenu.map(item => (
+              {filteredCatalog.map(item => (
                 <Card key={item.id} className="group border-none shadow-none hover:shadow-xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-transparent">
                   <div className="aspect-[4/5] relative overflow-hidden rounded-[2rem] shadow-card group-hover:scale-[0.98] transition-transform duration-500">
                     <BakeryItemImage src={item.image} alt={item.name} className="w-full h-full group-hover:scale-110 transition-transform duration-1000 ease-out" />
-                    {item.stock < 5 && item.stock > 0 && (
-                      <div className="absolute top-4 left-4">
-                        <span className="bg-berry text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg animate-pulse">Almost Gone!</span>
-                      </div>
-                    )}
-                    {menu.tomorrow.some(t => t.id === item.id) && (
-                      <div className="absolute top-4 right-4">
-                        <span className="bg-leaf text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg">Tomorrow's Prep</span>
-                      </div>
-                    )}
                   </div>
 
                   <CardContent className="px-2 py-6 space-y-4">
@@ -197,10 +158,6 @@ export default function MenuCardView() {
                         <div className="h-px bg-border flex-1 border-dotted border-b-2 mt-3" />
                         <span className="font-display font-black text-xl text-primary">₹{item.price.toFixed(2)}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-muted-foreground font-bold text-[9px] uppercase tracking-widest">
-                        <div className={`w-1.5 h-1.5 rounded-full ${item.stock > 0 ? 'bg-leaf' : 'bg-berry'}`} />
-                        <span>{item.stock > 0 ? `${item.stock} Available` : 'Sold Out'}</span>
-                      </div>
                     </div>
                     
                     <div className="flex items-center gap-2 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -208,7 +165,7 @@ export default function MenuCardView() {
                         variant="outline" 
                         size="sm" 
                         className="flex-1 rounded-xl h-9 text-[10px] font-black uppercase tracking-widest border-primary/20 text-primary hover:bg-primary/5"
-                        onClick={() => openEditModal(item, item.dayContext)}
+                        onClick={() => openEditModal(item)}
                       >
                         Edit Item
                       </Button>
@@ -216,7 +173,7 @@ export default function MenuCardView() {
                         variant="outline" 
                         size="sm" 
                         className="rounded-xl h-9 w-9 p-0 border-berry/20 text-berry hover:bg-berry/5"
-                        onClick={() => confirmDelete(item, item.dayContext)}
+                        onClick={() => confirmDelete(item)}
                       >
                         <Plus className="w-4 h-4 rotate-45" />
                       </Button>
@@ -247,23 +204,31 @@ export default function MenuCardView() {
               <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Product Name *</Label>
               <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Chocolate Croissant" className="rounded-xl h-12 bg-muted/20 border-none" />
             </div>
+            
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Price (₹) *</Label>
-                <Input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} placeholder="6.00" className="rounded-xl h-12 bg-muted/20 border-none" />
+                <Input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} placeholder="60.00" className="rounded-xl h-12 bg-muted/20 border-none" />
               </div>
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Batch Size</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Initial Stock</Label>
                 <Input type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} placeholder="20" className="rounded-xl h-12 bg-muted/20 border-none" />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Schedule For</Label>
-              <select value={formData.day} onChange={e => setFormData({...formData, day: e.target.value})} className="w-full h-12 px-4 rounded-xl border-none bg-muted/40 text-sm font-black outline-none focus:ring-2 focus:ring-primary">
-                <option value="today">Today</option>
-                <option value="tomorrow">Tomorrow</option>
-              </select>
+
+            <div className="flex items-center justify-between p-4 bg-primary/5 rounded-2xl border border-primary/10">
+              <div className="space-y-0.5">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-primary">Publicly Visible</Label>
+                <p className="text-[10px] text-muted-foreground font-medium">Show this item on the Digital Menu Card.</p>
+              </div>
+              <input 
+                type="checkbox" 
+                checked={formData.published} 
+                onChange={e => setFormData({...formData, published: e.target.checked})}
+                className="w-5 h-5 accent-primary cursor-pointer"
+              />
             </div>
+
             <div className="space-y-2">
               <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Product Image</Label>
               <div className="flex items-center gap-4 p-4 bg-muted/20 rounded-2xl border-2 border-dashed">
