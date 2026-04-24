@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 export default function MenuPlanning() {
-  const { menu } = useBakery();
+  const { menu, rolloverTomorrowToToday } = useBakery();
 
   const dayPlans = [
     { label: "Today", items: menu.today, status: "Active", date: "April 22, 2026", color: "text-primary", bg: "bg-primary/5" },
@@ -20,11 +20,20 @@ export default function MenuPlanning() {
         title="Production Planning" 
         subtitle="Manage what's baking today and what's rising for tomorrow."
         action={
-          <Link to="/admin/menu">
-            <Button className="rounded-xl font-bold gap-2 shadow-lg">
-              <Plus className="w-4 h-4" /> Manage Full Menu
+          <div className="flex gap-4">
+            <Button 
+              onClick={rolloverTomorrowToToday} 
+              variant="outline" 
+              className="rounded-xl font-bold gap-2 border-leaf/30 text-leaf hover:bg-leaf hover:text-white"
+            >
+              <CheckCircle2 className="w-4 h-4" /> Start New Day
             </Button>
-          </Link>
+            <Link to="/admin/menu">
+              <Button className="rounded-xl font-bold gap-2 shadow-lg">
+                <Plus className="w-4 h-4" /> Manage Full Menu
+              </Button>
+            </Link>
+          </div>
         }
       />
 

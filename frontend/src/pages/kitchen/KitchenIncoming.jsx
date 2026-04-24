@@ -34,9 +34,9 @@ export default function KitchenIncoming() {
   const getProduceQty = (id) => produceQty[id] || 5;
   const setItemQty = (id, val) => setProduceQty(prev => ({ ...prev, [id]: Math.max(1, val) }));
 
-  const handleCompleteBatch = (itemId, itemName) => {
+  const handleCompleteBatch = (itemId, itemName, dayContext) => {
     const qty = getProduceQty(itemId);
-    completeProductionBatch(itemId, qty);
+    completeProductionBatch(itemId, qty, dayContext);
     setProduceQty(prev => ({ ...prev, [itemId]: 5 }));
   };
 
@@ -166,7 +166,7 @@ export default function KitchenIncoming() {
                         <AlertDialogFooter className="mt-6 gap-3">
                           <AlertDialogCancel className="rounded-xl font-bold h-12 border-muted hover:bg-muted">Cancel</AlertDialogCancel>
                           <AlertDialogAction 
-                            onClick={() => handleCompleteBatch(item.id, item.name)} 
+                            onClick={() => handleCompleteBatch(item.id, item.name, dayContext)} 
                             className="rounded-xl font-bold h-12 bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20"
                           >
                             Yes, Log Production

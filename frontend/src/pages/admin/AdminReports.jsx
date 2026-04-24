@@ -4,6 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import { useBakery } from "@/store/BakeryContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, TrendingUp, DollarSign, ShoppingCart, Users, Download, Calendar, Package } from "lucide-react";
+import { exportToCSV } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -74,19 +75,19 @@ export default function AdminReports() {
 
   const handleExport = () => {
     if (filteredOrders.length === 0) { toast.error("No data available to export"); return; }
-    const headers = ["Order ID", "Customer", "Total", "Status", "Date"];
-    const rows = filteredOrders.map(o => [
-      o.id, o.customerName, o.total.toFixed(2), o.status,
-      new Date(o.createdAt).toLocaleDateString()
-    ]);
-    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Bakery_Report_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    toast.success("Business report downloaded!");
+    
+    const exportData = filteredOrders.map(o => ({
+      "Order ID": o.id,
+      "Customer": o.customerName,
+      "Total Revenue": `$${o.total.toFixed(2)}`,
+      "Status": o.status,
+      "Date": new Date(o.createdAt).toLocaleDateString(),
+      "Time": new Date(o.createdAt).toLocaleTimeString(),
+      "Items Count": o.items?.length || 0
+    }));
+
+    exportToCSV(exportData, `Bakery_Business_Report_${new Date().toISOString().split('T')[0]}`);
+    toast.success("Business report exported to CSV");
   };
 
   const stats = [

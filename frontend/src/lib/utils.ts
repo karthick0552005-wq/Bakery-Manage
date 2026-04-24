@@ -22,12 +22,17 @@ export function exportToCSV(data: any[], filename: string) {
   ];
   
   const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
   link.setAttribute('href', url);
   link.setAttribute('download', `${filename}.csv`);
-  link.style.visibility = 'hidden';
+  link.style.display = 'none';
   document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
+  
+  // Clean up
+  setTimeout(() => {
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, 100);
 }

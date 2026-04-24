@@ -110,13 +110,6 @@ export default function MenuCardView() {
             <Button onClick={() => setIsModalOpen(true)} className="rounded-xl font-black gap-2 shadow-lg">
               <Plus className="w-5 h-5" /> Add New Item
             </Button>
-            <Link 
-              to="/customer/menu"
-              className="inline-flex items-center justify-center rounded-full bg-white border border-border text-foreground shadow-sm hover:scale-105 transition-transform gap-2 px-6 h-10 font-black no-underline text-sm"
-            >
-              <BookOpen className="w-4 h-4" />
-              <span className="text-[10px] uppercase tracking-widest">Public View</span>
-            </Link>
           </div>
         }
       />

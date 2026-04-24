@@ -4,7 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import { useBakery } from "@/store/BakeryContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Edit3, Trash2, Power, Save, Image as ImageIcon, Upload, Calendar, Sparkles } from "lucide-react";
+import { Plus, Search, Edit3, Trash2, Power, Save, Image as ImageIcon, Upload, Calendar, Sparkles, ArrowRight, ArrowUpCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -34,7 +34,7 @@ import {
 import BakeryItemImage from "@/components/BakeryItemImage";
 
 export default function ManageMenu() {
-  const { menu, addMenuItem, updateMenuItem, deleteMenuItem } = useBakery();
+  const { menu, addMenuItem, updateMenuItem, deleteMenuItem, moveMenuItemToDay } = useBakery();
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -179,6 +179,15 @@ export default function ManageMenu() {
               </TableCell>
               <TableCell className="text-right pr-8">
                 <div className="flex items-center justify-end gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9 rounded-xl text-muted-foreground hover:text-leaf hover:bg-leaf/5"
+                    onClick={() => moveMenuItemToDay(item.id, day, day === 'today' ? 'tomorrow' : 'today')}
+                    title={day === 'today' ? "Move to Tomorrow" : "Move to Today"}
+                  >
+                    <ArrowRight className={`w-4 h-4 ${day === 'today' ? '' : 'rotate-180'}`} />
+                  </Button>
                   <Button variant="outline" size="sm" className="h-9 px-4 rounded-xl font-bold gap-2 border-primary/20 text-primary hover:bg-primary hover:text-white transition-all" onClick={() => handleOpenModal(item, day)}>
                     <Edit3 className="w-3.5 h-3.5" /> Edit
                   </Button>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import PageHeader from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, ShoppingCart, FileText, Calendar, ArrowRight } from "lucide-react";
+import { Plus, ShoppingCart, FileText, Calendar, ArrowRight, Download } from "lucide-react";
+import { exportToCSV } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -33,6 +34,24 @@ export default function PurchaseEntries() {
     toast.success("Purchase entry saved!");
   };
 
+  const handleExport = () => {
+    if (purchases.length === 0) {
+      toast.error("No purchase data to export");
+      return;
+    }
+    const exportData = purchases.map(p => ({
+      "ID": p.id,
+      "Date": p.date,
+      "Supplier": p.supplier,
+      "Items": p.items,
+      "Total Amount": `$${p.total.toFixed(2)}`,
+      "Status": p.status,
+      "Type": p.type
+    }));
+    exportToCSV(exportData, `Bakery_Purchases_${new Date().toISOString().split('T')[0]}`);
+    toast.success("Purchase entries exported to CSV");
+  };
+
   const totalSpending = purchases.reduce((sum, p) => sum + p.total, 0);
 
   return (
@@ -41,38 +60,43 @@ export default function PurchaseEntries() {
         title="Purchase Entries" 
         subtitle="Record and track bulk ingredient purchases from your suppliers."
         action={
-          <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-            <DialogTrigger asChild>
-              <Button className="rounded-xl font-black gap-2 shadow-lg">
-                <Plus className="w-5 h-5" /> New Entry
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden bg-white">
-              <div className="bg-primary p-8 text-white">
-                <DialogTitle className="text-3xl font-display font-black">New Purchase</DialogTitle>
-                <p className="opacity-70 text-sm font-medium mt-1">Record a new supply delivery.</p>
-              </div>
-              <div className="p-8 space-y-6">
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Supplier Name</Label>
-                  <Input value={formData.supplier} onChange={e => setFormData({...formData, supplier: e.target.value})} placeholder="e.g. Global Flour Mill" className="rounded-xl h-12 bg-muted/30 border-none" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Items & Qty</Label>
-                  <Input value={formData.items} onChange={e => setFormData({...formData, items: e.target.value})} placeholder="e.g. 50kg Flour, 10kg Yeast" className="rounded-xl h-12 bg-muted/30 border-none" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Total Amount ($)</Label>
-                  <Input type="number" value={formData.total} onChange={e => setFormData({...formData, total: e.target.value})} placeholder="0.00" className="rounded-xl h-12 bg-muted/30 border-none" />
-                </div>
-              </div>
-              <DialogFooter className="p-8 pt-0">
-                <Button onClick={handleSave} className="w-full h-14 rounded-xl font-black text-lg gap-2 bg-primary text-white">
-                  <Save className="w-5 h-5" /> Save Entry
+          <div className="flex gap-3">
+            <Button variant="outline" className="rounded-xl font-bold gap-2" onClick={handleExport}>
+              <Download className="w-4 h-4" /> Export CSV
+            </Button>
+            <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="rounded-xl font-black gap-2 shadow-lg">
+                  <Plus className="w-5 h-5" /> New Entry
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="rounded-[2.5rem] p-0 border-none shadow-2xl overflow-hidden bg-white">
+                <div className="bg-primary p-8 text-white">
+                  <DialogTitle className="text-3xl font-display font-black">New Purchase</DialogTitle>
+                  <p className="opacity-70 text-sm font-medium mt-1">Record a new supply delivery.</p>
+                </div>
+                <div className="p-8 space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Supplier Name</Label>
+                    <Input value={formData.supplier} onChange={e => setFormData({...formData, supplier: e.target.value})} placeholder="e.g. Global Flour Mill" className="rounded-xl h-12 bg-muted/30 border-none" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Items & Qty</Label>
+                    <Input value={formData.items} onChange={e => setFormData({...formData, items: e.target.value})} placeholder="e.g. 50kg Flour, 10kg Yeast" className="rounded-xl h-12 bg-muted/30 border-none" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Total Amount ($)</Label>
+                    <Input type="number" value={formData.total} onChange={e => setFormData({...formData, total: e.target.value})} placeholder="0.00" className="rounded-xl h-12 bg-muted/30 border-none" />
+                  </div>
+                </div>
+                <DialogFooter className="p-8 pt-0">
+                  <Button onClick={handleSave} className="w-full h-14 rounded-xl font-black text-lg gap-2 bg-primary text-white">
+                    <Save className="w-5 h-5" /> Save Entry
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         }
       />
 

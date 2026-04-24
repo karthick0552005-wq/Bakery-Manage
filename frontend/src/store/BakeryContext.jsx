@@ -217,16 +217,16 @@ export const BakeryProvider = ({ children }) => {
     setFeedbacks([newFeedback, ...feedbacks]);
   };
 
-  const completeProductionBatch = (itemId, producedQty) => {
+  const completeProductionBatch = (itemId, producedQty, day = 'today') => {
     // 1. Add produced quantity to the menu item's stock
     setMenu(prev => {
-      const todayMenu = prev.today.map(item => {
+      const updatedDayMenu = prev[day].map(item => {
         if (item.id === itemId) {
           return { ...item, stock: item.stock + producedQty };
         }
         return item;
       });
-      return { ...prev, today: todayMenu };
+      return { ...prev, [day]: updatedDayMenu };
     });
 
     // 2. Deduct raw materials (simplified: each item uses some flour, butter, sugar)
@@ -238,17 +238,40 @@ export const BakeryProvider = ({ children }) => {
     }));
 
     // 3. Log the production entry
-    const item = menu.today.find(i => i.id === itemId);
+    const item = menu[day].find(i => i.id === itemId);
     setProductionLog(prev => [...prev, {
       id: `PROD${Date.now()}`,
       itemName: item?.name || "Unknown",
       qty: producedQty,
       completedAt: new Date().toISOString(),
+      dayContext: day
     }]);
 
-    toast.success(`${producedQty} pcs produced!`, {
+    toast.success(`${producedQty} pcs produced for ${day}!`, {
       description: `Stock updated & raw materials deducted.`,
     });
+  };
+
+  const moveMenuItemToDay = (itemId, fromDay, toDay) => {
+    setMenu(prev => {
+      const itemToMove = prev[fromDay].find(i => i.id === itemId);
+      if (!itemToMove) return prev;
+
+      return {
+        ...prev,
+        [fromDay]: prev[fromDay].filter(i => i.id !== itemId),
+        [toDay]: [...prev[toDay], itemToMove]
+      };
+    });
+    toast.success(`Moved to ${toDay}'s menu`);
+  };
+
+  const rolloverTomorrowToToday = () => {
+    setMenu(prev => ({
+      today: [...prev.today, ...prev.tomorrow],
+      tomorrow: []
+    }));
+    toast.success("Rolled over tomorrow's plan to today!");
   };
 
   const addInventoryItem = (item) => {
@@ -364,6 +387,8 @@ export const BakeryProvider = ({ children }) => {
         addInventoryItem,
         feedbacks,
         addFeedback,
+        moveMenuItemToDay,
+        rolloverTomorrowToToday,
         updateUser,
         resetSystem
       }}

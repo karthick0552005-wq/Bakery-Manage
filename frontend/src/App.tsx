@@ -79,7 +79,7 @@ const App = () => (
               </Route>
 
               {/* Customer Routes */}
-              <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
+              <Route element={<ProtectedRoute allowedRoles={['customer', 'admin']} />}>
                 <Route path="/customer" element={<CustomerDashboard />} />
                 <Route path="/customer/menu" element={<CustomerMenu />} />
                 <Route path="/customer/cart" element={<Cart />} />
@@ -93,7 +93,7 @@ const App = () => (
               </Route>
 
               {/* Kitchen Routes */}
-              <Route element={<ProtectedRoute allowedRoles={['kitchen']} />}>
+              <Route element={<ProtectedRoute allowedRoles={['kitchen', 'admin']} />}>
                 <Route path="/kitchen" element={<KitchenDashboard />} />
                 <Route path="/kitchen/incoming" element={<KitchenIncoming />} />
                 <Route path="/kitchen/inventory" element={<KitchenInventory />} />

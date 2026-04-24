@@ -73,18 +73,20 @@ export default function Inventory() {
   };
 
   const handleExport = () => {
-    const exportData = inventory.map(item => ({
+    const exportData = allInventory.map(item => ({
       ID: item.id,
       Name: item.name,
       Category: item.category,
-      Stock: item.stock,
+      Total_Stock: item.stock,
+      Bakery_Stock: item.bakeryStock,
+      Kitchen_Stock: item.kitchenStock,
       Unit: item.unit,
-      Min_Stock: item.min,
-      Status: item.stock < item.min ? "Low" : "Optimal"
+      Min_Threshold: item.min,
+      Status: item.stock < item.min ? "Low Stock" : "Optimal"
     }));
     
-    exportToCSV(exportData, `Bakery_Inventory_${new Date().toISOString().split('T')[0]}`);
-    toast.success("Inventory exported to CSV");
+    exportToCSV(exportData, `Bakery_Full_Inventory_${new Date().toISOString().split('T')[0]}`);
+    toast.success("Full inventory exported to CSV");
   };
 
   return (
@@ -104,37 +106,58 @@ export default function Inventory() {
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-none shadow-card bg-primary text-primary-foreground rounded-[2rem]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="border-none shadow-card bg-primary text-primary-foreground rounded-[2.5rem]">
           <CardContent className="p-8 space-y-2">
             <div className="p-3 bg-white/20 w-fit rounded-2xl mb-2">
               <Boxes className="w-6 h-6" />
             </div>
-            <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Total Items</p>
-            <h3 className="text-4xl font-display font-black">{inventory.length}</h3>
-            <p className="text-xs font-medium opacity-80">+2 added this week</p>
+            <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Total Stock Items</p>
+            <h3 className="text-4xl font-display font-black">{allInventory.length}</h3>
+            <p className="text-xs font-medium opacity-80">Raw + Finished Goods</p>
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-card bg-leaf text-white rounded-[2rem]">
+        <Card className="border-none shadow-card bg-leaf text-white rounded-[2.5rem]">
           <CardContent className="p-8 space-y-2">
             <div className="p-3 bg-white/20 w-fit rounded-2xl mb-2">
               <ArrowUpRight className="w-6 h-6" />
             </div>
             <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Healthy Stock</p>
-            <h3 className="text-4xl font-display font-black">{inventory.filter(i => i.stock >= i.min).length}</h3>
-            <p className="text-xs font-medium opacity-80">92% of inventory is stable</p>
+            <h3 className="text-4xl font-display font-black">{allInventory.filter(i => i.stock >= i.min).length}</h3>
+            <p className="text-xs font-medium opacity-80">{((allInventory.filter(i => i.stock >= i.min).length / allInventory.length) * 100).toFixed(0)}% Stability Rate</p>
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-card bg-berry text-white rounded-[2rem]">
+        <Card className="border-none shadow-card bg-berry text-white rounded-[2.5rem]">
           <CardContent className="p-8 space-y-2">
             <div className="p-3 bg-white/20 w-fit rounded-2xl mb-2">
               <ArrowDownRight className="w-6 h-6" />
             </div>
             <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Low Stock Alerts</p>
-            <h3 className="text-4xl font-display font-black">{inventory.filter(i => i.stock < i.min).length}</h3>
-            <p className="text-xs font-medium opacity-80">Requires immediate attention</p>
+            <h3 className="text-4xl font-display font-black">{allInventory.filter(i => i.stock < i.min).length}</h3>
+            <p className="text-xs font-medium opacity-80">Immediate Restock Required</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-card bg-[#8B4513] text-white rounded-[2.5rem]">
+          <CardContent className="p-8 space-y-2">
+            <div className="p-3 bg-white/20 w-fit rounded-2xl mb-2">
+              <Boxes className="w-6 h-6" />
+            </div>
+            <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Bakery vs Kitchen</p>
+            <div className="flex items-end gap-2">
+              <h3 className="text-3xl font-display font-black">
+                {((allInventory.reduce((s, i) => s + (i.bakeryStock || 0), 0) / (allInventory.reduce((s, i) => s + (i.stock || 0), 0) || 1)) * 100).toFixed(0)}%
+              </h3>
+              <p className="text-[10px] font-black mb-1.5 opacity-70">IN FRONT</p>
+            </div>
+            <div className="w-full bg-white/20 h-1.5 rounded-full overflow-hidden">
+              <div 
+                className="bg-white h-full transition-all duration-1000" 
+                style={{ width: `${((allInventory.reduce((s, i) => s + (i.bakeryStock || 0), 0) / (allInventory.reduce((s, i) => s + (i.stock || 0), 0) || 1)) * 100)}%` }} 
+              />
+            </div>
           </CardContent>
         </Card>
       </div>
