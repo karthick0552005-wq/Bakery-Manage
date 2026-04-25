@@ -115,10 +115,7 @@ export const BakeryProvider = ({ children }) => {
   const updateKitchenRequestStatus = (id, status) => {
     setKitchenRequests(prev => prev.map(r => {
       if (r.id === id) {
-        // If approved and it's a restock request, update the actual inventory
-        if (status === "Approved" && r.type === "Restock" && r.metadata) {
-          updateInventoryStock(r.metadata.itemId, parseFloat(r.metadata.qty), "Admin Approval", 0, "Kitchen");
-        }
+
         return { ...r, status };
       }
       return r;
