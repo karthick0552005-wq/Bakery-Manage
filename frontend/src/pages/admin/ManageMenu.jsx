@@ -59,7 +59,7 @@ export default function ManageMenu() {
         name: item.name, 
         price: item.price, 
         category: item.category, 
-        stock: item.stock, 
+        stock: item.targetStock !== undefined ? item.targetStock : item.stock, 
         image: item.image || '', 
         day: day 
       });
@@ -98,7 +98,8 @@ export default function ManageMenu() {
       name: formData.name,
       price: parseFloat(formData.price) || 0,
       category: formData.category,
-      stock: parseInt(formData.stock) || 0,
+      targetStock: parseInt(formData.stock) || 0,
+      stock: editingItem ? (editingItem.stock !== undefined ? editingItem.stock : 0) : 0,
       image: formData.image,
       published: true
     };
@@ -135,7 +136,7 @@ export default function ManageMenu() {
               </TableCell>
               <TableCell className="text-center">
                 <span className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-black">
-                  {item.stock} Units
+                  {item.targetStock !== undefined ? item.targetStock : item.stock} Units
                 </span>
               </TableCell>
               <TableCell className="text-center">

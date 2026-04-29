@@ -39,7 +39,10 @@ export const BakeryProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [productionLog, setProductionLog] = useState([]);
+  const [productionLog, setProductionLog] = useState(() => {
+    const saved = localStorage.getItem("bakery_production_log");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   // Restore Sync with LocalStorage
   useEffect(() => {
@@ -69,6 +72,37 @@ export const BakeryProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem("bakery_feedback", JSON.stringify(feedbacks));
   }, [feedbacks]);
+
+  useEffect(() => {
+    localStorage.setItem("bakery_production_log", JSON.stringify(productionLog));
+  }, [productionLog]);
+
+  // Sync state across multiple tabs
+  useEffect(() => {
+    const handleStorageSync = (e) => {
+      if (!e.newValue) return;
+      try {
+        const data = JSON.parse(e.newValue);
+        switch (e.key) {
+          case "bakery_menu": setMenu(data); break;
+          case "bakery_orders": setOrders(data); break;
+          case "bakery_inventory": setInventory(data); break;
+          case "bakery_cart": setCart(data); break;
+          case "bakery_catalog": setCatalog(data); break;
+          case "bakery_kitchen_requests": setKitchenRequests(data); break;
+          case "bakery_purchases": setPurchases(data); break;
+          case "bakery_feedback": setFeedbacks(data); break;
+          case "bakery_production_log": setProductionLog(data); break;
+          default: break;
+        }
+      } catch (err) {
+        console.error("Sync Error:", err);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageSync);
+    return () => window.removeEventListener("storage", handleStorageSync);
+  }, []);
 
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem("bakery_user");
@@ -124,26 +158,32 @@ export const BakeryProvider = ({ children }) => {
   };
 
   const placeOrder = (items) => {
-    // 1. Check if enough stock is available
-    for (const orderedItem of items) {
-      const menuItem = menu.today.find(m => m.id === orderedItem.id);
-      if (menuItem && menuItem.stock < orderedItem.qty) {
-        toast.error(`Not enough stock for ${orderedItem.name}!`);
-        return null;
+    // 1. Check if enough stock is available (only for immediate orders, skip for pre-orders)
+    const isPreOrder = items.some(i => i.isPreOrder);
+    if (!isPreOrder) {
+      for (const orderedItem of items) {
+        const menuItem = menu.today.find(m => m.id === orderedItem.id || m.name === orderedItem.name);
+        if (menuItem && menuItem.stock < orderedItem.qty) {
+          toast.error(`Not enough stock for ${orderedItem.name}!`);
+          return null;
+        }
       }
     }
 
-    // 2. Deduct stock
-    setMenu(prev => ({
-      ...prev,
-      today: prev.today.map(menuItem => {
-        const orderedItem = items.find(i => i.id === menuItem.id);
-        if (orderedItem) {
-          return { ...menuItem, stock: Math.max(0, menuItem.stock - orderedItem.qty) };
-        }
-        return menuItem;
-      })
-    }));
+    // 2. Deduct stock from Production Plan (Today's Menu) - Skip for pre-orders
+    if (!isPreOrder) {
+      setMenu(prev => ({
+        ...prev,
+        today: prev.today.map(menuItem => {
+          // Try to find by ID first, then by Name (since Catalog IDs differ from Production IDs)
+          const orderedItem = items.find(i => i.id === menuItem.id || i.name === menuItem.name);
+          if (orderedItem) {
+            return { ...menuItem, stock: Math.max(0, (menuItem.stock || 0) - orderedItem.qty) };
+          }
+          return menuItem;
+        })
+      }));
+    }
 
     // 3. Create order
     const newOrder = {
@@ -194,7 +234,8 @@ export const BakeryProvider = ({ children }) => {
     setMenu(prev => {
       const updatedDayMenu = prev[day].map(item => {
         if (item.id === itemId) {
-          return { ...item, stock: item.stock + producedQty };
+          const currentTargetStock = item.targetStock !== undefined ? item.targetStock : item.stock;
+          return { ...item, stock: (item.stock || 0) + producedQty, targetStock: currentTargetStock };
         }
         return item;
       });
@@ -328,14 +369,19 @@ export const BakeryProvider = ({ children }) => {
   const clearCart = () => setCart([]);
 
   const resetSystem = () => {
+    const savedCatalog = localStorage.getItem("bakery_catalog");
     localStorage.clear();
+    if (savedCatalog) {
+      localStorage.setItem("bakery_catalog", savedCatalog);
+    }
     setOrders([]);
     setInventory([]);
     setMenu({ today: [], tomorrow: [] });
     setKitchenRequests([]);
     setFeedbacks([]);
+    setProductionLog([]);
     setCart([]);
-    toast.success("System reset successfully! All data cleared.");
+    toast.success("System reset successfully! All data except Menu Card cleared.");
     window.location.href = "/login";
   };
 

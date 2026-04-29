@@ -45,6 +45,17 @@ export default function Inventory() {
       bakeryStock: item.bakeryStock || (item.stock || 0),
       kitchenStock: item.kitchenStock || 0,
       isProduct: true
+    })),
+    ...menu.tomorrow.map(item => ({
+      ...item,
+      id: `PROD-TOM-${item.id}`,
+      unit: "pcs",
+      min: 5,
+      category: "Finished Product",
+      bakeryStock: 0,
+      kitchenStock: 0,
+      isProduct: true,
+      isTomorrow: true
     }))
   ];
 
@@ -253,7 +264,14 @@ export default function Inventory() {
                 return (
                   <tr key={item.id} className="hover:bg-muted/20 transition-colors">
                     <td className="px-8 py-5">
-                      <p className="font-bold text-sm">{item.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-sm">{item.name}</p>
+                        {item.isTomorrow && (
+                          <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-leaf/10 text-leaf border border-leaf/20">
+                            Tomorrow
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[10px] text-muted-foreground font-medium">ID: {item.id}</p>
                     </td>
                     <td className="px-8 py-5">

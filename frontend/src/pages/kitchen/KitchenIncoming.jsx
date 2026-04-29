@@ -123,7 +123,7 @@ export default function KitchenIncoming() {
                       <div className="flex items-center gap-4">
                         <div className="space-y-0.5">
                           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Target Stock</p>
-                          <p className="text-xl font-display font-black">{item.stock} <span className="text-sm opacity-50">pcs</span></p>
+                          <p className="text-xl font-display font-black">{item.targetStock !== undefined ? item.targetStock : item.stock} <span className="text-sm opacity-50">pcs</span></p>
                         </div>
                         <div className="h-8 w-px bg-border" />
                         <div className="space-y-0.5">

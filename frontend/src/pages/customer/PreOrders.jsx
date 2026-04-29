@@ -32,14 +32,14 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function PreOrders() {
-  const { menu, placeOrder } = useBakery();
+  const { catalog, placeOrder } = useBakery();
   const [selectedItem, setSelectedItem] = useState(null);
   const [qty, setQty] = useState(1);
   const [deliveryTime, setDeliveryTime] = useState("8:00 AM");
   const [note, setNote] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const tomorrowItems = menu.tomorrow || [];
+  const tomorrowItems = catalog.filter(item => item.published) || [];
 
   const handlePreOrder = () => {
     if (!selectedItem) return;

@@ -96,9 +96,9 @@ export default function AdminOrders() {
                     <p className="text-[10px] text-muted-foreground font-medium">Standard Delivery</p>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-sm font-medium">{order.items.length} items</p>
+                    <p className="text-sm font-medium">{order.items.reduce((sum, i) => sum + i.qty, 0)} items</p>
                     <p className="text-[10px] text-muted-foreground truncate max-w-[150px]">
-                      {order.items.map(i => i.name).join(', ')}
+                      {order.items.map(i => `${i.qty}x ${i.name}`).join(', ')}
                     </p>
                   </td>
                   <td className="px-6 py-4">

@@ -81,7 +81,7 @@ export default function AdminDashboard() {
                   <div key={o.id} className="flex items-center justify-between border-b last:border-0 pb-3 last:pb-0">
                     <div>
                       <p className="font-medium">#{o.id.slice(-5)} · {o.customerName}</p>
-                      <p className="text-xs text-muted-foreground">{o.items.length} items · ₹{o.total.toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground">{o.items.reduce((sum, i) => sum + i.qty, 0)} items · ₹{o.total.toFixed(2)}</p>
                     </div>
                     <StatusBadge status={o.status} />
                   </div>
